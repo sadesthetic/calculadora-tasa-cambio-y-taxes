@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Calculadora estética y minimalista para estimar el ahorro real al pagar impuestos o trámites en Venezuela usando la tasa oficial del banco (BCV) frente a la tasa del dólar paralelo.">
+    <title>Ahorro Cambiario | USD ⇄ VES</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons via CDN for modern minimal icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="glass-bg-blur"></div>
+    <div class="glass-bg-blur-secondary"></div>
+    
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">
+                    <i data-lucide="percent" class="icon-accent"></i>
+                </div>
+                <div>
+                    <h1>Ahorro Cambiario</h1>
+                    <p class="subtitle">Calculadora de Factor de Conversión</p>
+                </div>
+            </div>
+            <button id="theme-toggle" class="btn-icon" aria-label="Cambiar tema">
+                <i data-lucide="moon"></i>
+            </button>
+        </header>
+
+        <!-- Main Workspace -->
+        <main class="app-main">
+            <!-- Left Side: Inputs -->
+            <section class="card-glass input-section">
+                <h2 class="section-title">
+                    <i data-lucide="sliders" class="icon-title"></i>
+                    Parámetros de Entrada
+                </h2>
+                
+                <form id="calculator-form" onsubmit="return false;">
+                    <!-- Tax Input -->
+                    <div class="input-group">
+                        <label for="tax-amount">Monto del Impuesto (USD)</label>
+                        <div class="input-wrapper">
+                            <span class="input-prefix">$</span>
+                            <input type="number" id="tax-amount" placeholder="100.00" min="0" step="0.01" required autocomplete="off">
+                            <span class="input-suffix">USD</span>
+                        </div>
+                        <p class="input-helper">El monto total facturado o expresado en divisas.</p>
+                    </div>
+
+                    <div class="rates-grid">
+                        <!-- Bank Rate Input -->
+                        <div class="input-group">
+                            <label for="rate-bank">Dólar Oficial (Banco / BCV)</label>
+                            <div class="input-wrapper input-blue">
+                                <span class="input-prefix">Bs.</span>
+                                <input type="number" id="rate-bank" placeholder="38.50" min="0.01" step="0.01" required autocomplete="off">
+                                <span class="input-suffix">/ $</span>
+                            </div>
+                            <p class="input-helper">Tasa oficial aceptada por la institución.</p>
+                        </div>
+
+                        <!-- Street Rate Input -->
+                        <div class="input-group">
+                            <label for="rate-street">Dólar de Calle (Paralelo)</label>
+                            <div class="input-wrapper input-emerald">
+                                <span class="input-prefix">Bs.</span>
+                                <input type="number" id="rate-street" placeholder="45.20" min="0.01" step="0.01" required autocomplete="off">
+                                <span class="input-suffix">/ $</span>
+                            </div>
+                            <p class="input-helper">Tasa real del mercado al cambiar divisas.</p>
+                        </div>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Right Side: Results & Visualization -->
+            <section class="results-section">
+                <!-- Summary Card -->
+                <div class="card-glass result-summary-card">
+                    <div class="savings-badge">
+                        <i data-lucide="sparkles"></i>
+                        Ahorro de <span id="saving-pct-badge">0.00%</span>
+                    </div>
+                    
+                    <p class="result-label">Te estás ahorrando en total</p>
+                    <div class="main-saving-display">
+                        <span class="currency-symbol">$</span>
+                        <span id="saving-usd-main">0.00</span>
+                        <span class="currency-code">USD</span>
+                    </div>
+                    
+                    <p class="saving-ves-sub">Equivalente a <strong id="saving-ves-main">0.00 Bs.</strong> en calle</p>
+
+                    <!-- Comparison Visual Bar -->
+                    <div class="visual-progress-container">
+                        <div class="progress-labels">
+                            <span>Monto Original: <strong id="bar-original-label">$0.00</strong></span>
+                            <span>Gastado Real: <strong id="bar-spent-label">$0.00</strong></span>
+                        </div>
+                        <div class="progress-bar-track">
+                            <div id="progress-bar-spent" class="progress-bar-spent" style="width: 100%"></div>
+                            <div id="progress-bar-saved" class="progress-bar-saved" style="width: 0%"></div>
+                        </div>
+                        <div class="progress-legend">
+                            <span class="legend-item spent"><span class="dot"></span>Dólares Reales Gastados</span>
+                            <span class="legend-item saved"><span class="dot"></span>Ahorro Directo</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Detailed Cards Grid -->
+                <div class="details-grid">
+                    <!-- Bolivares Needed Card -->
+                    <div class="card-glass detail-card">
+                        <div class="detail-header">
+                            <span class="detail-title">Pago en Bolívares (Tasa Banco)</span>
+                            <div class="detail-icon icon-blue">
+                                <i data-lucide="wallet"></i>
+                            </div>
+                        </div>
+                        <div class="detail-value text-blue">
+                            <span id="ves-to-pay">0.00</span> <span class="unit">Bs.</span>
+                        </div>
+                        <p class="detail-description">Monto que debitará la institución en moneda nacional.</p>
+                    </div>
+
+                    <!-- Dollars Street Card -->
+                    <div class="card-glass detail-card">
+                        <div class="detail-header">
+                            <span class="detail-title">Dólares Reales Requeridos</span>
+                            <div class="detail-icon icon-emerald">
+                                <i data-lucide="arrow-down-up"></i>
+                            </div>
+                        </div>
+                        <div class="detail-value text-emerald">
+                            <span class="unit">$</span><span id="usd-needed-real">0.00</span> <span class="unit">USD</span>
+                        </div>
+                        <p class="detail-description">Lo que realmente gastas al vender dólares a tasa de calle.</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Information Accordion & Quick Presets -->
+        <footer class="app-footer">
+            <div class="footer-info">
+                <p><strong>Factor de Conversión:</strong> <span id="conversion-factor-display">1.0000</span> (Por cada $1.00 oficial, necesitas cambiar <span id="street-factor-display">$1.00</span> en calle)</p>
+            </div>
+            <div class="footer-credits">
+                <p>© 2026 - Diseñado con estética y precisión.</p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Script connection -->
+    <script src="app.js"></script>
+</body>
+</html>
