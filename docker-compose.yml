@@ -1,0 +1,7 @@
+services:
+  calculator-app:
+    build: .
+    container_name: tax_calculator_app
+    ports:
+      - "8080:80"
+    restart: unless-stopped

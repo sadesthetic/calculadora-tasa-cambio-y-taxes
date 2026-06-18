@@ -31,6 +31,12 @@ Dado que esta es una aplicación web SPA estática (HTML/CSS/JS nativo), puedes 
 
 1. **Doble clic en `index.html`**: Simplemente abre el archivo directamente en tu navegador web preferido (Chrome, Safari, Firefox, Edge, etc.).
 2. **Servidor Local (Recomendado)**: Si utilizas VS Code, puedes usar la extensión **Live Server** para levantar un servidor web local en un clic, o ejecutar con `python -m http.server` o `npx serve`.
+3. **Con Docker 🐳**:
+   Si tienes Docker instalado y en ejecución, puedes levantar la aplicación en un contenedor de Nginx ejecutando:
+   ```bash
+   docker compose up --build -d
+   ```
+   Luego, abre tu navegador e ingresa a `http://localhost:8080` para usar la aplicación.
 
 ---
 
