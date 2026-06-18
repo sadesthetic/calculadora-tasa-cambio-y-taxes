@@ -19,17 +19,35 @@ const conversionFactorDisplay = document.getElementById('conversion-factor-displ
 const streetFactorDisplay = document.getElementById('street-factor-display');
 
 // DOM Elements - APR Calculator
+const aprModeSelect = document.getElementById('apr-mode');
 const aprPrincipalInput = document.getElementById('apr-principal');
 const aprRateInput = document.getElementById('apr-rate');
 const aprTimeInput = document.getElementById('apr-time');
 const aprTimeUnitSelect = document.getElementById('apr-time-unit');
 const aprCompoundingSelect = document.getElementById('apr-compounding');
 
+// Labels to be updated dynamically based on mode
+const aprPrincipalLabel = document.getElementById('apr-principal-label');
+const aprPrincipalHelper = document.getElementById('apr-principal-helper');
+const aprCompoundingLabel = document.getElementById('apr-compounding-label');
+const aprCompoundingHelper = document.getElementById('apr-compounding-helper');
+const aprBadgeText = document.getElementById('apr-badge-text');
+const aprTotalLabel = document.getElementById('apr-total-label');
+const aprInterestSubLabel = document.getElementById('apr-interest-sub-label');
+const barPrincipalTitle = document.getElementById('bar-principal-title');
+const barInterestTitle = document.getElementById('bar-interest-title');
+const legendPrincipalText = document.getElementById('legend-principal-text');
+const legendInterestText = document.getElementById('legend-interest-text');
+const detailInterestTitle = document.getElementById('detail-interest-title');
+const detailInterestDesc = document.getElementById('detail-interest-desc');
+const detailPaymentTitle = document.getElementById('detail-payment-title');
+const detailPaymentDesc = document.getElementById('detail-payment-desc');
+
 const aprTotalMain = document.getElementById('apr-total-main');
 const aprInterestSub = document.getElementById('apr-interest-sub');
 const aprInterestDetail = document.getElementById('apr-interest-detail');
 const aprMonthlyDetail = document.getElementById('apr-monthly-detail');
-const aprApyDisplay = document.getElementById('apr-apy-display');
+let aprApyDisplay = document.getElementById('apr-apy-display');
 
 const barPrincipalLabel = document.getElementById('bar-principal-label');
 const barInterestLabel = document.getElementById('bar-interest-label');
@@ -108,6 +126,99 @@ const switchView = (viewId) => {
     localStorage.setItem('active_view', viewId);
 };
 
+// APR Calculator Configurations based on selected mode (Investment vs Loan)
+const APR_MODES_CONFIG = {
+    investment: {
+        principalLabel: 'Monto Principal (Capital Inicial)',
+        principalHelper: 'El monto de dinero invertido originalmente.',
+        compoundingLabel: 'Tipo de Interés / Capitalización',
+        compoundingHelper: 'Frecuencia con la que se suma el interés al capital.',
+        badgeText: 'Retorno Estimado',
+        totalLabel: 'Balance Total Estimado',
+        interestSubLabel: 'Intereses totales:',
+        barPrincipalTitle: 'Principal',
+        barInterestTitle: 'Intereses',
+        legendPrincipalText: 'Capital Inicial',
+        legendInterestText: 'Interés Acumulado',
+        detailInterestTitle: 'Interés Generado',
+        detailInterestDesc: 'Monto total ganado por intereses.',
+        detailPaymentTitle: 'Rendimiento Mensual',
+        detailPaymentDesc: 'Ganancia mensual promedio equivalente.',
+        footerText: '<strong>Tasa de Rendimiento Efectiva (APY):</strong> <span id="apr-apy-display">0.00%</span> (Refleja el interés real considerando la capitalización)',
+        compoundingOptions: [
+            { value: 'simple', text: 'Interés Simple (Sin reinversión)' },
+            { value: 'monthly', text: 'Compuesto - Mensual' },
+            { value: 'annually', text: 'Compuesto - Anual' }
+        ],
+        defaultCompounding: 'annually'
+    },
+    loan: {
+        principalLabel: 'Monto del Préstamo (Principal)',
+        principalHelper: 'El monto total de la deuda solicitada.',
+        compoundingLabel: 'Método de Pago / Amortización',
+        compoundingHelper: 'Estructura en la que se devuelve el préstamo.',
+        badgeText: 'Pago Estimado',
+        totalLabel: 'Total a Pagar',
+        interestSubLabel: 'Intereses totales a pagar:',
+        barPrincipalTitle: 'Préstamo',
+        barInterestTitle: 'Costo de Interés',
+        legendPrincipalText: 'Capital Prestado',
+        legendInterestText: 'Intereses Totales',
+        detailInterestTitle: 'Interés Pagado',
+        detailInterestDesc: 'Monto total pagado en intereses.',
+        detailPaymentTitle: 'Cuota Mensual',
+        detailPaymentDesc: 'Cuota mensual amortizada (Principal + Intereses).',
+        footerText: '<strong>Tasa de Costo Efectivo (CAT / APY):</strong> <span id="apr-apy-display">0.00%</span> (Refleja el costo real del préstamo considerando la capitalización)',
+        compoundingOptions: [
+            { value: 'amortized', text: 'Cuota Fija (Amortización Francesa)' },
+            { value: 'bullet', text: 'Pago Único (Capital + Interés al final)' }
+        ],
+        defaultCompounding: 'amortized'
+    }
+};
+
+const updateAprUiAndOptions = (mode, selectedCompounding = null) => {
+    const config = APR_MODES_CONFIG[mode];
+    if (!config) return;
+
+    // Update labels and helper texts
+    aprPrincipalLabel.textContent = config.principalLabel;
+    aprPrincipalHelper.textContent = config.principalHelper;
+    aprCompoundingLabel.textContent = config.compoundingLabel;
+    aprCompoundingHelper.textContent = config.compoundingHelper;
+    aprBadgeText.textContent = config.badgeText;
+    aprTotalLabel.textContent = config.totalLabel;
+    aprInterestSubLabel.textContent = config.interestSubLabel;
+    barPrincipalTitle.textContent = config.barPrincipalTitle;
+    barInterestTitle.textContent = config.barInterestTitle;
+    legendPrincipalText.textContent = config.legendPrincipalText;
+    legendInterestText.textContent = config.legendInterestText;
+    detailInterestTitle.textContent = config.detailInterestTitle;
+    detailInterestDesc.textContent = config.detailInterestDesc;
+    detailPaymentTitle.textContent = config.detailPaymentTitle;
+    detailPaymentDesc.textContent = config.detailPaymentDesc;
+
+    // Update Footer HTML
+    infoAprFooter.innerHTML = `<p>${config.footerText}</p>`;
+    // Re-bind aprApyDisplay element reference
+    aprApyDisplay = document.getElementById('apr-apy-display');
+
+    // Update Compounding Select Options
+    aprCompoundingSelect.innerHTML = '';
+    config.compoundingOptions.forEach(opt => {
+        const optionEl = document.createElement('option');
+        optionEl.value = opt.value;
+        optionEl.textContent = opt.text;
+        aprCompoundingSelect.appendChild(optionEl);
+    });
+
+    // Set value
+    const targetCompounding = selectedCompounding || localStorage.getItem('apr_compounding') || config.defaultCompounding;
+    const exists = config.compoundingOptions.some(opt => opt.value === targetCompounding);
+    aprCompoundingSelect.value = exists ? targetCompounding : config.defaultCompounding;
+    localStorage.setItem('apr_compounding', aprCompoundingSelect.value);
+};
+
 // Initialize Rates and Forms
 const initApp = () => {
     // Re-render icons
@@ -139,13 +250,25 @@ const initApp = () => {
     });
 
     // --- APR Calculator Setup ---
+    const aprMode = localStorage.getItem('apr_mode') || 'investment';
+    aprModeSelect.value = aprMode;
     aprPrincipalInput.value = localStorage.getItem('apr_principal') || '1000';
     aprRateInput.value = localStorage.getItem('apr_rate') || '12';
     aprTimeInput.value = localStorage.getItem('apr_time') || '12';
     aprTimeUnitSelect.value = localStorage.getItem('apr_time_unit') || 'months';
-    aprCompoundingSelect.value = localStorage.getItem('apr_compounding') || 'annually';
+
+    // Populate dynamic UI labels and compounding select based on current mode
+    updateAprUiAndOptions(aprMode);
 
     calculateApr();
+
+    // Mode listener
+    aprModeSelect.addEventListener('change', () => {
+        const mode = aprModeSelect.value;
+        localStorage.setItem('apr_mode', mode);
+        updateAprUiAndOptions(mode);
+        calculateApr();
+    });
 
     [aprPrincipalInput, aprRateInput, aprTimeInput, aprTimeUnitSelect, aprCompoundingSelect].forEach(input => {
         input.addEventListener('input', () => {
@@ -226,6 +349,7 @@ const resetExchangeOutputs = () => {
 
 // APR / Interest Calculations
 const calculateApr = () => {
+    const mode = aprModeSelect.value;
     const principal = parseFloat(aprPrincipalInput.value) || 0;
     const aprRate = parseFloat(aprRateInput.value) || 0;
     const timeVal = parseFloat(aprTimeInput.value) || 0;
@@ -237,38 +361,48 @@ const calculateApr = () => {
         return;
     }
 
-    // Convert time to years
+    // Convert time to years and months
     const timeYears = timeUnit === 'months' ? timeVal / 12 : timeVal;
     const timeMonths = timeUnit === 'months' ? timeVal : timeVal * 12;
 
     let finalAmount = 0;
     let interestEarned = 0;
     let apy = aprRate;
-
-    if (compounding === 'simple') {
-        interestEarned = principal * (aprRate / 100) * timeYears;
-        finalAmount = principal + interestEarned;
-        apy = aprRate;
-    } else if (compounding === 'monthly') {
-        const n = 12; // periods per year
-        finalAmount = principal * Math.pow(1 + (aprRate / (n * 100)), n * timeYears);
-        interestEarned = finalAmount - principal;
-        apy = (Math.pow(1 + (aprRate / 1200), 12) - 1) * 100;
-    } else if (compounding === 'annually') {
-        const n = 1; // periods per year
-        finalAmount = principal * Math.pow(1 + (aprRate / (n * 100)), n * timeYears);
-        interestEarned = finalAmount - principal;
-        apy = aprRate;
-    }
-
-    // Calculate Amortized Monthly Payment (as if it were a loan)
-    // Formula: P * [i(1+i)^n] / [(1+i)^n - 1]
     let monthlyPayment = 0;
-    const monthlyRate = (aprRate / 100) / 12;
-    if (monthlyRate > 0 && timeMonths > 0) {
-        monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, timeMonths)) / (Math.pow(1 + monthlyRate, timeMonths) - 1);
-    } else if (timeMonths > 0) {
-        monthlyPayment = principal / timeMonths;
+
+    if (mode === 'investment') {
+        if (compounding === 'simple') {
+            interestEarned = principal * (aprRate / 100) * timeYears;
+            finalAmount = principal + interestEarned;
+            apy = aprRate;
+        } else if (compounding === 'monthly') {
+            finalAmount = principal * Math.pow(1 + (aprRate / 1200), 12 * timeYears);
+            interestEarned = finalAmount - principal;
+            apy = (Math.pow(1 + (aprRate / 1200), 12) - 1) * 100;
+        } else if (compounding === 'annually') {
+            finalAmount = principal * Math.pow(1 + (aprRate / 100), timeYears);
+            interestEarned = finalAmount - principal;
+            apy = aprRate;
+        }
+        monthlyPayment = interestEarned / timeMonths; // average monthly yield
+    } else if (mode === 'loan') {
+        if (compounding === 'amortized') {
+            const monthlyRate = (aprRate / 100) / 12;
+            if (monthlyRate > 0 && timeMonths > 0) {
+                monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, timeMonths)) / (Math.pow(1 + monthlyRate, timeMonths) - 1);
+            } else if (timeMonths > 0) {
+                monthlyPayment = principal / timeMonths;
+            }
+            finalAmount = monthlyPayment * timeMonths;
+            interestEarned = finalAmount - principal;
+            // Effective annual interest rate (APY) for loan compounding monthly
+            apy = (Math.pow(1 + (aprRate / 1200), 12) - 1) * 100;
+        } else if (compounding === 'bullet') {
+            interestEarned = principal * (aprRate / 100) * timeYears;
+            finalAmount = principal + interestEarned;
+            monthlyPayment = finalAmount; // paid as a single payment at the end
+            apy = aprRate;
+        }
     }
 
     // Update UI elements
@@ -276,7 +410,9 @@ const calculateApr = () => {
     aprInterestSub.textContent = `$${formatCurrency(interestEarned)} USD`;
     aprInterestDetail.textContent = formatCurrency(interestEarned);
     aprMonthlyDetail.textContent = formatCurrency(monthlyPayment);
-    aprApyDisplay.textContent = `${apy.toFixed(2)}%`;
+    if (aprApyDisplay) {
+        aprApyDisplay.textContent = `${apy.toFixed(2)}%`;
+    }
 
     // Update Progress Bar
     const principalPercent = (principal / finalAmount) * 100;
@@ -294,7 +430,9 @@ const resetAprOutputs = () => {
     aprInterestSub.textContent = '$0.00 USD';
     aprInterestDetail.textContent = '0.00';
     aprMonthlyDetail.textContent = '0.00';
-    aprApyDisplay.textContent = '0.00%';
+    if (aprApyDisplay) {
+        aprApyDisplay.textContent = '0.00%';
+    }
     progressBarPrincipal.style.width = '100%';
     progressBarInterest.style.width = '0%';
     barPrincipalLabel.textContent = '$0.00';
