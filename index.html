@@ -172,32 +172,19 @@
                     <section class="card-glass input-section">
                         <h2 class="section-title">
                             <i data-lucide="sliders" class="icon-title"></i>
-                            Parámetros APR
+                            Parámetros del Préstamo
                         </h2>
                         
                         <form id="apr-form" onsubmit="return false;">
-                            <!-- Calculation Mode -->
-                            <div class="input-group">
-                                <label for="apr-mode">Finalidad del Cálculo</label>
-                                <div class="select-wrapper">
-                                    <select id="apr-mode" class="select-custom">
-                                        <option value="investment" selected>Inversión / Ahorro (Crece el capital)</option>
-                                        <option value="loan">Préstamo / Crédito (Se amortiza en cuotas)</option>
-                                    </select>
-                                    <div class="select-arrow"><i data-lucide="chevron-down"></i></div>
-                                </div>
-                                <p class="input-helper">Elige si estás calculando un ahorro o pagando una deuda.</p>
-                            </div>
-
                             <!-- Principal Amount -->
                             <div class="input-group">
-                                <label id="apr-principal-label" for="apr-principal">Monto Principal (Capital Inicial)</label>
+                                <label id="apr-principal-label" for="apr-principal">Monto del Préstamo (Principal)</label>
                                 <div class="input-wrapper input-purple">
                                     <span class="input-prefix">$</span>
                                     <input type="number" id="apr-principal" placeholder="1,000.00" min="0.01" step="0.01" required autocomplete="off">
                                     <span class="input-suffix">USD</span>
                                 </div>
-                                <p id="apr-principal-helper" class="input-helper">El monto de dinero invertido originalmente.</p>
+                                <p id="apr-principal-helper" class="input-helper">El monto total de la deuda solicitada.</p>
                             </div>
 
                             <div class="rates-grid">
@@ -221,22 +208,21 @@
                                             <option value="years" selected>Años</option>
                                         </select>
                                     </div>
-                                    <p class="input-helper">Duración del préstamo o inversión.</p>
+                                    <p class="input-helper">Duración del préstamo.</p>
                                 </div>
                             </div>
 
-                            <!-- Compounding/Amortization Frequency -->
+                            <!-- Amortization Frequency -->
                             <div class="input-group">
-                                <label id="apr-compounding-label" for="apr-compounding">Tipo de Interés / Capitalización</label>
+                                <label id="apr-compounding-label" for="apr-compounding">Método de Pago / Amortización</label>
                                 <div class="select-wrapper">
                                     <select id="apr-compounding" class="select-custom">
-                                        <option value="simple">Interés Simple (Sin reinversión)</option>
-                                        <option value="monthly">Compuesto - Mensual</option>
-                                        <option value="annually" selected>Compuesto - Anual</option>
+                                        <option value="amortized" selected>Cuota Fija (Amortización Francesa)</option>
+                                        <option value="bullet">Pago Único (Capital + Interés al final)</option>
                                     </select>
                                     <div class="select-arrow"><i data-lucide="chevron-down"></i></div>
                                 </div>
-                                <p id="apr-compounding-helper" class="input-helper">Frecuencia con la que se suma el interés al capital.</p>
+                                <p id="apr-compounding-helper" class="input-helper">Estructura en la que se devuelve el préstamo.</p>
                             </div>
                         </form>
                     </section>
@@ -247,31 +233,31 @@
                         <div class="card-glass result-summary-card">
                             <div class="savings-badge apr-badge">
                                 <i data-lucide="trending-up"></i>
-                                <span id="apr-badge-text">Retorno Estimado</span>
+                                <span id="apr-badge-text">Pago Estimado</span>
                             </div>
                             
-                            <p id="apr-total-label" class="result-label">Balance Total Estimado</p>
+                            <p id="apr-total-label" class="result-label">Total a Pagar</p>
                             <div class="main-saving-display apr-display">
                                 <span class="currency-symbol">$</span>
                                 <span id="apr-total-main">0.00</span>
                                 <span class="currency-code">USD</span>
                             </div>
                             
-                            <p class="saving-ves-sub"><span id="apr-interest-sub-label">Intereses totales:</span> <strong id="apr-interest-sub">$0.00 USD</strong></p>
+                            <p class="saving-ves-sub"><span id="apr-interest-sub-label">Intereses totales a pagar:</span> <strong id="apr-interest-sub">$0.00 USD</strong></p>
 
                             <!-- Comparison Visual Bar -->
                             <div class="visual-progress-container">
                                 <div class="progress-labels">
-                                    <span><span id="bar-principal-title">Principal</span>: <strong id="bar-principal-label">$0.00</strong></span>
-                                    <span><span id="bar-interest-title">Intereses</span>: <strong id="bar-interest-label">$0.00</strong></span>
+                                    <span><span id="bar-principal-title">Préstamo</span>: <strong id="bar-principal-label">$0.00</strong></span>
+                                    <span><span id="bar-interest-title">Costo de Interés</span>: <strong id="bar-interest-label">$0.00</strong></span>
                                 </div>
                                 <div class="progress-bar-track">
                                     <div id="progress-bar-principal" class="progress-bar-spent" style="width: 100%"></div>
                                     <div id="progress-bar-interest" class="progress-bar-saved" style="width: 0%"></div>
                                 </div>
                                 <div class="progress-legend">
-                                    <span class="legend-item spent"><span class="dot"></span><span id="legend-principal-text">Capital Inicial</span></span>
-                                    <span class="legend-item saved"><span class="dot"></span><span id="legend-interest-text">Interés Acumulado</span></span>
+                                    <span class="legend-item spent"><span class="dot"></span><span id="legend-principal-text">Capital Prestado</span></span>
+                                    <span class="legend-item saved"><span class="dot"></span><span id="legend-interest-text">Intereses Totales</span></span>
                                 </div>
                             </div>
                         </div>
@@ -281,7 +267,7 @@
                             <!-- Interest Total Card -->
                             <div class="card-glass detail-card">
                                 <div class="detail-header">
-                                    <span id="detail-interest-title" class="detail-title">Interés Generado</span>
+                                    <span id="detail-interest-title" class="detail-title">Interés Pagado</span>
                                     <div class="detail-icon icon-emerald">
                                         <i data-lucide="piggy-bank"></i>
                                     </div>
@@ -289,13 +275,13 @@
                                 <div class="detail-value text-emerald">
                                     <span class="unit">$</span><span id="apr-interest-detail">0.00</span>
                                 </div>
-                                <p id="detail-interest-desc" class="detail-description">Monto total ganado o cobrado por intereses.</p>
+                                <p id="detail-interest-desc" class="detail-description">Monto total pagado en intereses.</p>
                             </div>
 
                             <!-- Monthly Equivalent Card / Payment -->
                             <div class="card-glass detail-card">
                                 <div class="detail-header">
-                                    <span id="detail-payment-title" class="detail-title">Rendimiento Mensual</span>
+                                    <span id="detail-payment-title" class="detail-title">Cuota Mensual</span>
                                     <div class="detail-icon icon-blue">
                                         <i data-lucide="calendar"></i>
                                     </div>
@@ -303,7 +289,7 @@
                                 <div class="detail-value text-blue">
                                     <span class="unit">$</span><span id="apr-monthly-detail">0.00</span>
                                 </div>
-                                <p id="detail-payment-desc" class="detail-description">Ganancia mensual promedio equivalente.</p>
+                                <p id="detail-payment-desc" class="detail-description">Cuota mensual amortizada (Principal + Intereses).</p>
                             </div>
                         </div>
                     </section>
@@ -318,7 +304,7 @@
                     <p><strong>Factor de Conversión:</strong> <span id="conversion-factor-display">1.0000</span> (Por cada $1.00 oficial, necesitas cambiar <span id="street-factor-display">$1.00</span> en calle)</p>
                 </div>
                 <div id="info-apr-footer" class="hidden">
-                    <p><strong>Tasa de Rendimiento Efectiva (APY):</strong> <span id="apr-apy-display">0.00%</span> (Refleja el interés real considerando la capitalización)</p>
+                    <p><strong>Tasa Efectiva Anual (APY/TEA):</strong> <span id="apr-apy-display">0.00%</span> (Refleja el costo anual efectivo del préstamo considerando la capitalización)</p>
                 </div>
             </div>
             <div class="footer-credits">
