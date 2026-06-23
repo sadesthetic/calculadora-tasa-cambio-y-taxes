@@ -41,7 +41,33 @@ const navTabs = document.querySelectorAll('.nav-tab');
 const appViews = document.querySelectorAll('.app-view');
 const infoExchangeFooter = document.getElementById('info-exchange-footer');
 const infoAprFooter = document.getElementById('info-apr-footer');
+const infoAdvalFooter = document.getElementById('info-adval-footer');
 const themeToggleBtn = document.getElementById('theme-toggle');
+
+// DOM Elements - Ad Valorem Calculator
+const advalValueInput = document.getElementById('adval-value');
+const toggleFleteCheckbox = document.getElementById('toggle-flete');
+const toggleSeguroCheckbox = document.getElementById('toggle-seguro');
+const valFleteInput = document.getElementById('val-flete');
+const pctSeguroInput = document.getElementById('pct-seguro');
+const valSeguroCalcSpan = document.getElementById('val-seguro-calc');
+const advalBadgeRateSpan = document.getElementById('adval-badge-rate');
+const advalTotalMain = document.getElementById('adval-total-main');
+const advalTaxSub = document.getElementById('adval-tax-sub');
+
+const barFobLabel = document.getElementById('bar-fob-label');
+const barTaxLabel = document.getElementById('bar-tax-label');
+const progressBarFob = document.getElementById('progress-bar-fob');
+const progressBarFleteSeguro = document.getElementById('progress-bar-flete-seguro');
+const progressBarAdvalTax = document.getElementById('progress-bar-adval-tax');
+
+const advalCifDetail = document.getElementById('adval-cif-detail');
+const advalTaxDetail = document.getElementById('adval-tax-detail');
+const advalCifFormula = document.getElementById('adval-cif-formula');
+
+const cardFlete = document.getElementById('card-flete');
+const cardSeguro = document.getElementById('card-seguro');
+const segmentBtns = document.querySelectorAll('.segment-btn');
 
 // Initialize theme
 const getSavedTheme = () => localStorage.getItem('theme') || 'dark';
@@ -96,12 +122,16 @@ const switchView = (viewId) => {
     });
 
     // Toggle Footer Info
+    infoExchangeFooter.classList.add('hidden');
+    infoAprFooter.classList.add('hidden');
+    infoAdvalFooter.classList.add('hidden');
+
     if (viewId === 'view-exchange') {
         infoExchangeFooter.classList.remove('hidden');
-        infoAprFooter.classList.add('hidden');
-    } else {
-        infoExchangeFooter.classList.add('hidden');
+    } else if (viewId === 'view-apr') {
         infoAprFooter.classList.remove('hidden');
+    } else if (viewId === 'view-advalorem') {
+        infoAdvalFooter.classList.remove('hidden');
     }
 
     // Cache active view
@@ -155,6 +185,58 @@ const initApp = () => {
             localStorage.setItem('apr_time_unit', aprTimeUnitSelect.value);
             localStorage.setItem('apr_compounding', aprCompoundingSelect.value);
             calculateApr();
+        });
+    });
+
+    // --- Ad Valorem Calculator Setup ---
+    advalValueInput.value = localStorage.getItem('adval_value') || '15000';
+    
+    const savedRate = localStorage.getItem('adval_rate') || '37';
+    segmentBtns.forEach(btn => {
+        if (btn.getAttribute('data-rate') === savedRate) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+
+    toggleFleteCheckbox.checked = localStorage.getItem('adval_toggle_flete') !== 'false';
+    toggleSeguroCheckbox.checked = localStorage.getItem('adval_toggle_seguro') !== 'false';
+    valFleteInput.value = localStorage.getItem('adval_val_flete') || '3500';
+    pctSeguroInput.value = localStorage.getItem('adval_pct_seguro') || '2.5';
+
+    updateCardState(toggleFleteCheckbox, cardFlete);
+    updateCardState(toggleSeguroCheckbox, cardSeguro);
+
+    calculateAdValorem();
+
+    [advalValueInput, valFleteInput, pctSeguroInput].forEach(input => {
+        input.addEventListener('input', () => {
+            localStorage.setItem('adval_value', advalValueInput.value);
+            localStorage.setItem('adval_val_flete', valFleteInput.value);
+            localStorage.setItem('adval_pct_seguro', pctSeguroInput.value);
+            calculateAdValorem();
+        });
+    });
+
+    toggleFleteCheckbox.addEventListener('change', () => {
+        localStorage.setItem('adval_toggle_flete', toggleFleteCheckbox.checked);
+        updateCardState(toggleFleteCheckbox, cardFlete);
+        calculateAdValorem();
+    });
+
+    toggleSeguroCheckbox.addEventListener('change', () => {
+        localStorage.setItem('adval_toggle_seguro', toggleSeguroCheckbox.checked);
+        updateCardState(toggleSeguroCheckbox, cardSeguro);
+        calculateAdValorem();
+    });
+
+    segmentBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            segmentBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            localStorage.setItem('adval_rate', btn.getAttribute('data-rate'));
+            calculateAdValorem();
         });
     });
 };
@@ -296,6 +378,102 @@ const resetAprOutputs = () => {
     progressBarInterest.style.width = '0%';
     barPrincipalLabel.textContent = '$0.00';
     barInterestLabel.textContent = '$0.00';
+};
+
+// Ad Valorem Calculations
+const calculateAdValorem = () => {
+    const fob = parseFloat(advalValueInput.value) || 0;
+    const isFleteActive = toggleFleteCheckbox.checked;
+    const isSeguroActive = toggleSeguroCheckbox.checked;
+
+    const flete = isFleteActive ? (parseFloat(valFleteInput.value) || 0) : 0;
+    const seguroPercent = parseFloat(pctSeguroInput.value) || 0;
+    const seguro = isSeguroActive ? (fob * (seguroPercent / 100)) : 0;
+
+    // Update Seguro calculated value display
+    valSeguroCalcSpan.textContent = `$${formatCurrency(seguro)}`;
+
+    if (fob <= 0) {
+        resetAdValoremOutputs();
+        return;
+    }
+
+    const cif = fob + flete + seguro;
+    
+    // Find active rate
+    let rate = 37;
+    const activeBtn = document.querySelector('.segment-btn.active');
+    if (activeBtn) {
+        rate = parseFloat(activeBtn.getAttribute('data-rate')) || 37;
+    }
+
+    advalBadgeRateSpan.textContent = `${rate}%`;
+
+    const tax = cif * (rate / 100);
+    const total = cif + tax;
+
+    // Update main outputs
+    animateValue(advalTotalMain, parseFloat(advalTotalMain.textContent) || 0, total);
+    advalTaxSub.textContent = `$${formatCurrency(tax)} USD`;
+    advalCifDetail.textContent = formatCurrency(cif);
+    advalTaxDetail.textContent = formatCurrency(tax);
+    advalCifFormula.textContent = `$${formatCurrency(cif)}`;
+
+    // Update Progress Bar
+    const fobPercent = (fob / total) * 100;
+    const extraPercent = ((flete + seguro) / total) * 100;
+    const taxPercent = (tax / total) * 100;
+
+    progressBarFob.style.width = `${fobPercent}%`;
+    progressBarFleteSeguro.style.width = `${extraPercent}%`;
+    progressBarAdvalTax.style.width = `${taxPercent}%`;
+
+    barFobLabel.textContent = `$${formatCurrency(fob)}`;
+    barTaxLabel.textContent = `$${formatCurrency(tax)}`;
+
+    // Update Comparison Table
+    const rates = [37, 52, 72];
+    rates.forEach(r => {
+        const row = document.getElementById(`row-rate-${r}`);
+        if (row) {
+            const rowTax = cif * (r / 100);
+            const rowTotal = cif + rowTax;
+            row.querySelector('.tax-col').textContent = `$${formatCurrency(rowTax)}`;
+            row.querySelector('.total-col').textContent = `$${formatCurrency(rowTotal)}`;
+        }
+    });
+};
+
+const resetAdValoremOutputs = () => {
+    advalTotalMain.textContent = '0.00';
+    advalTaxSub.textContent = '$0.00 USD';
+    advalCifDetail.textContent = '0.00';
+    advalTaxDetail.textContent = '0.00';
+    advalCifFormula.textContent = '$0.00';
+    valSeguroCalcSpan.textContent = '$0.00';
+
+    progressBarFob.style.width = '100%';
+    progressBarFleteSeguro.style.width = '0%';
+    progressBarAdvalTax.style.width = '0%';
+
+    barFobLabel.textContent = '$0.00';
+    barTaxLabel.textContent = '$0.00';
+
+    [37, 52, 72].forEach(r => {
+        const row = document.getElementById(`row-rate-${r}`);
+        if (row) {
+            row.querySelector('.tax-col').textContent = '$0.00';
+            row.querySelector('.total-col').textContent = '$0.00';
+        }
+    });
+};
+
+const updateCardState = (checkbox, card) => {
+    if (checkbox.checked) {
+        card.classList.add('active');
+    } else {
+        card.classList.remove('active');
+    }
 };
 
 // Counter animation helper

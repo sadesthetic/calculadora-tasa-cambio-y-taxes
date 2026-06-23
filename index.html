@@ -44,6 +44,10 @@
                 <i data-lucide="line-chart"></i>
                 <span>Calculadora APR</span>
             </button>
+            <button class="nav-tab" data-target="view-advalorem">
+                <i data-lucide="percent"></i>
+                <span>Tasa Ad Valorem</span>
+            </button>
         </nav>
 
         <!-- Main Workspace -->
@@ -295,6 +299,192 @@
                     </section>
                 </div>
             </div>
+
+            <!-- VIEW 3: AD VALOREM CALCULATOR -->
+            <div id="view-advalorem" class="app-view">
+                <div class="app-main">
+                    <!-- Left Side: Inputs -->
+                    <section class="card-glass input-section">
+                        <h2 class="section-title">
+                            <i data-lucide="sliders" class="icon-title icon-amber"></i>
+                            Parámetros de Importación
+                        </h2>
+                        
+                        <form id="advalorem-form" onsubmit="return false;">
+                            <!-- Vehicle Value -->
+                            <div class="input-group">
+                                <label for="adval-value">Valor del Vehículo (FOB)</label>
+                                <div class="input-wrapper input-amber">
+                                    <span class="input-prefix">$</span>
+                                    <input type="number" id="adval-value" placeholder="15000.00" min="0" step="0.01" required autocomplete="off">
+                                    <span class="input-suffix">USD</span>
+                                </div>
+                                <p class="input-helper">El valor base de compra del vehículo.</p>
+                            </div>
+
+                            <!-- Tasa Ad Valorem % Picker -->
+                            <div class="input-group">
+                                <label>Tasa Ad Valorem</label>
+                                <div class="segmented-control">
+                                    <button type="button" class="segment-btn active" data-rate="37">37%</button>
+                                    <button type="button" class="segment-btn" data-rate="52">52%</button>
+                                    <button type="button" class="segment-btn" data-rate="72">72%</button>
+                                </div>
+                                <p class="input-helper">Selecciona el arancel aplicable.</p>
+                            </div>
+
+                            <!-- Additional Variables (Flete & Seguro) -->
+                            <div class="input-group">
+                                <label>Variables Adicionales (CIF)</label>
+                                <div class="toggle-cards-grid">
+                                    <!-- Flete Card -->
+                                    <div class="toggle-card active" id="card-flete">
+                                        <div class="toggle-card-header">
+                                            <span class="toggle-card-title">Flete Aéreo/Marítimo</span>
+                                            <label class="switch">
+                                                <input type="checkbox" id="toggle-flete" checked>
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <div class="toggle-card-body">
+                                            <div class="mini-input-wrapper">
+                                                <span class="mini-prefix">$</span>
+                                                <input type="number" id="val-flete" value="3500" min="0" step="1">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Seguro Card -->
+                                    <div class="toggle-card active" id="card-seguro">
+                                        <div class="toggle-card-header">
+                                            <span class="toggle-card-title">Seguro (2.5%)</span>
+                                            <label class="switch">
+                                                <input type="checkbox" id="toggle-seguro" checked>
+                                                <span class="slider round"></span>
+                                            </label>
+                                        </div>
+                                        <div class="toggle-card-body">
+                                            <div class="mini-input-wrapper">
+                                                <input type="number" id="pct-seguro" value="2.5" min="0" step="0.1" max="100">
+                                                <span class="mini-suffix">%</span>
+                                            </div>
+                                            <span class="mini-calc-val" id="val-seguro-calc">$0.00</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="input-helper">Activa y edita el flete y seguro para calcular el valor CIF.</p>
+                            </div>
+                        </form>
+                    </section>
+
+                    <!-- Right Side: Results & Visualization -->
+                    <section class="results-section">
+                        <!-- Summary Card -->
+                        <div class="card-glass result-summary-card advalorem-summary-card">
+                            <div class="savings-badge advalorem-badge">
+                                <i data-lucide="percent"></i>
+                                <span>Tasa Aplicada: <span id="adval-badge-rate">37%</span></span>
+                            </div>
+                            
+                            <p class="result-label">Suma Total (Vehículo + Adicionales + Arancel)</p>
+                            <div class="main-saving-display advalorem-display">
+                                <span class="currency-symbol">$</span>
+                                <span id="adval-total-main">0.00</span>
+                                <span class="currency-code">USD</span>
+                            </div>
+                            
+                            <p class="saving-ves-sub">Impuesto Ad Valorem a pagar: <strong id="adval-tax-sub">$0.00 USD</strong></p>
+
+                            <!-- Comparison Visual Bar -->
+                            <div class="visual-progress-container">
+                                <div class="progress-labels">
+                                    <span>Vehículo (FOB): <strong id="bar-fob-label">$0.00</strong></span>
+                                    <span>Impuesto: <strong id="bar-tax-label">$0.00</strong></span>
+                                </div>
+                                <div class="progress-bar-track">
+                                    <div id="progress-bar-fob" class="progress-bar-spent" style="width: 60%"></div>
+                                    <div id="progress-bar-flete-seguro" class="progress-bar-flete-seguro" style="width: 15%"></div>
+                                    <div id="progress-bar-adval-tax" class="progress-bar-saved" style="width: 25%"></div>
+                                </div>
+                                <div class="progress-legend">
+                                    <span class="legend-item fob"><span class="dot"></span>Vehículo Base</span>
+                                    <span class="legend-item extra"><span class="dot"></span>Flete + Seguro</span>
+                                    <span class="legend-item tax"><span class="dot"></span>Impuesto Arancelario</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Detailed Cards Grid -->
+                        <div class="details-grid">
+                            <!-- Base Imponible (CIF) Card -->
+                            <div class="card-glass detail-card">
+                                <div class="detail-header">
+                                    <span class="detail-title">Base Imponible (CIF)</span>
+                                    <div class="detail-icon icon-blue">
+                                        <i data-lucide="anchor"></i>
+                                    </div>
+                                </div>
+                                <div class="detail-value text-blue">
+                                    <span class="unit">$</span><span id="adval-cif-detail">0.00</span>
+                                </div>
+                                <p class="detail-description">Valor FOB + Flete + Seguro. Base para el cálculo.</p>
+                            </div>
+
+                            <!-- Arancel Ad Valorem Card -->
+                            <div class="card-glass detail-card">
+                                <div class="detail-header">
+                                    <span class="detail-title">Monto Arancel</span>
+                                    <div class="detail-icon icon-amber">
+                                        <i data-lucide="receipt"></i>
+                                    </div>
+                                </div>
+                                <div class="detail-value text-amber">
+                                    <span class="unit">$</span><span id="adval-tax-detail">0.00</span>
+                                </div>
+                                <p class="detail-description">Impuesto liquidado correspondiente al porcentaje arancelario.</p>
+                            </div>
+                        </div>
+
+                        <!-- Rate Comparison Table Card -->
+                        <div class="card-glass detail-card comparison-table-card">
+                            <div class="detail-header">
+                                <span class="detail-title">Comparación de Tasas (Sobre misma base)</span>
+                                <div class="detail-icon icon-purple">
+                                    <i data-lucide="layers"></i>
+                                </div>
+                            </div>
+                            <div class="comparison-table-wrapper">
+                                <table class="comparison-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Tasa</th>
+                                            <th>Monto Impuesto</th>
+                                            <th>Costo Total</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr id="row-rate-37">
+                                            <td>37%</td>
+                                            <td class="tax-col">$0.00</td>
+                                            <td class="total-col">$0.00</td>
+                                        </tr>
+                                        <tr id="row-rate-52">
+                                            <td>52%</td>
+                                            <td class="tax-col">$0.00</td>
+                                            <td class="total-col">$0.00</td>
+                                        </tr>
+                                        <tr id="row-rate-72">
+                                            <td>72%</td>
+                                            <td class="tax-col">$0.00</td>
+                                            <td class="total-col">$0.00</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+                </div>
+            </div>
         </main>
 
         <!-- Information & Quick Presets -->
@@ -305,6 +495,9 @@
                 </div>
                 <div id="info-apr-footer" class="hidden">
                     <p><strong>Tasa Efectiva Anual (APY/TEA):</strong> <span id="apr-apy-display">0.00%</span> (Refleja el costo anual efectivo del préstamo considerando la capitalización)</p>
+                </div>
+                <div id="info-adval-footer" class="hidden">
+                    <p><strong>Fórmula de Importación:</strong> Se calcula el arancel sobre el valor CIF (Vehículo + Flete + Seguro). Base imponible: <span id="adval-cif-formula">$0,00</span>.</p>
                 </div>
             </div>
             <div class="footer-credits">
