@@ -69,6 +69,15 @@ const cardFlete = document.getElementById('card-flete');
 const cardSeguro = document.getElementById('card-seguro');
 const segmentBtns = document.querySelectorAll('.segment-btn');
 
+// DOM Elements - Alternative Real Cost Calculator
+const toggleAltCalcCheckbox = document.getElementById('toggle-alt-calc');
+const altCalcBodyDiv = document.getElementById('alt-calc-body');
+const altValRealInput = document.getElementById('alt-val-real');
+const altFobDisplay = document.getElementById('alt-fob-display');
+const altExtraDisplay = document.getElementById('alt-extra-display');
+const altTaxDisplay = document.getElementById('alt-tax-display');
+const altTotalDisplay = document.getElementById('alt-total-display');
+
 // Initialize theme
 const getSavedTheme = () => localStorage.getItem('theme') || 'dark';
 const setBgTheme = (theme) => {
@@ -238,6 +247,31 @@ const initApp = () => {
             localStorage.setItem('adval_rate', btn.getAttribute('data-rate'));
             calculateAdValorem();
         });
+    });
+
+    // --- Alternative Calculator Setup ---
+    altValRealInput.value = localStorage.getItem('adval_alt_val_real') || '11000';
+    toggleAltCalcCheckbox.checked = localStorage.getItem('adval_toggle_alt_calc') === 'true';
+
+    if (toggleAltCalcCheckbox.checked) {
+        altCalcBodyDiv.classList.remove('hidden');
+    } else {
+        altCalcBodyDiv.classList.add('hidden');
+    }
+
+    altValRealInput.addEventListener('input', () => {
+        localStorage.setItem('adval_alt_val_real', altValRealInput.value);
+        calculateAdValorem();
+    });
+
+    toggleAltCalcCheckbox.addEventListener('change', () => {
+        localStorage.setItem('adval_toggle_alt_calc', toggleAltCalcCheckbox.checked);
+        if (toggleAltCalcCheckbox.checked) {
+            altCalcBodyDiv.classList.remove('hidden');
+        } else {
+            altCalcBodyDiv.classList.add('hidden');
+        }
+        calculateAdValorem();
     });
 };
 
@@ -442,6 +476,20 @@ const calculateAdValorem = () => {
             row.querySelector('.total-col').textContent = `$${formatCurrency(rowTotal)}`;
         }
     });
+
+    // Update Alternative Real Cost Calculator if active
+    const isAltCalcActive = toggleAltCalcCheckbox.checked;
+    if (isAltCalcActive) {
+        const altFob = parseFloat(altValRealInput.value) || 0;
+        const altSeguro = isSeguroActive ? (altFob * (seguroPercent / 100)) : 0;
+        const altExtra = flete + altSeguro;
+        const altTotal = altFob + altExtra + tax;
+
+        altFobDisplay.textContent = `$${formatCurrency(altFob)}`;
+        altExtraDisplay.textContent = `$${formatCurrency(altExtra)}`;
+        altTaxDisplay.textContent = `$${formatCurrency(tax)}`;
+        altTotalDisplay.textContent = `$${formatCurrency(altTotal)}`;
+    }
 };
 
 const resetAdValoremOutputs = () => {
@@ -466,6 +514,12 @@ const resetAdValoremOutputs = () => {
             row.querySelector('.total-col').textContent = '$0.00';
         }
     });
+
+    // Reset alternative calculator displays
+    altFobDisplay.textContent = '$0,00';
+    altExtraDisplay.textContent = '$0,00';
+    altTaxDisplay.textContent = '$0,00';
+    altTotalDisplay.textContent = '$0,00';
 };
 
 const updateCardState = (checkbox, card) => {
