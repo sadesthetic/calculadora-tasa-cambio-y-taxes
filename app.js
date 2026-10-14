@@ -184,6 +184,10 @@ const initApp = () => {
     aprTimeUnitSelect.value = localStorage.getItem('apr_time_unit') || 'months';
     aprCompoundingSelect.value = localStorage.getItem('apr_compounding') || 'amortized';
 
+    if (window.EarlyPaymentUI) {
+        window.EarlyPaymentUI.init();
+    }
+
     calculateApr();
 
     [aprPrincipalInput, aprRateInput, aprTimeInput, aprTimeUnitSelect, aprCompoundingSelect].forEach(input => {
@@ -398,6 +402,20 @@ const calculateApr = () => {
 
     barPrincipalLabel.textContent = `$${formatCurrency(principal)}`;
     barInterestLabel.textContent = `$${formatCurrency(interestEarned)}`;
+
+    // Manejar visibilidad de pagos anticipados según método
+    const cardEarlyPayEl = document.getElementById('card-early-pay');
+    if (cardEarlyPayEl) {
+        if (compounding === 'amortized') {
+            cardEarlyPayEl.classList.remove('hidden');
+        } else {
+            cardEarlyPayEl.classList.add('hidden');
+        }
+    }
+
+    if (window.EarlyPaymentUI) {
+        window.EarlyPaymentUI.update();
+    }
 };
 
 const resetAprOutputs = () => {
@@ -412,6 +430,10 @@ const resetAprOutputs = () => {
     progressBarInterest.style.width = '0%';
     barPrincipalLabel.textContent = '$0.00';
     barInterestLabel.textContent = '$0.00';
+
+    if (window.EarlyPaymentUI) {
+        window.EarlyPaymentUI.update();
+    }
 };
 
 // Ad Valorem Calculations

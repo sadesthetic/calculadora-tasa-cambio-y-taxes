@@ -12,6 +12,7 @@
     <!-- Lucide Icons via CDN -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="css/early-payment.css">
 </head>
 <body>
     <div class="glass-bg-blur"></div>
@@ -172,64 +173,153 @@
             <!-- VIEW 2: APR CALCULATOR -->
             <div id="view-apr" class="app-view">
                 <div class="app-main">
-                    <!-- Left Side: Inputs -->
-                    <section class="card-glass input-section">
-                        <h2 class="section-title">
-                            <i data-lucide="sliders" class="icon-title"></i>
-                            Parámetros del Préstamo
-                        </h2>
-                        
-                        <form id="apr-form" onsubmit="return false;">
-                            <!-- Principal Amount -->
-                            <div class="input-group">
-                                <label id="apr-principal-label" for="apr-principal">Monto del Préstamo (Principal)</label>
-                                <div class="input-wrapper input-purple">
-                                    <span class="input-prefix">$</span>
-                                    <input type="number" id="apr-principal" placeholder="1,000.00" min="0.01" step="0.01" required autocomplete="off">
-                                    <span class="input-suffix">USD</span>
-                                </div>
-                                <p id="apr-principal-helper" class="input-helper">El monto total de la deuda solicitada.</p>
-                            </div>
-
-                            <div class="rates-grid">
-                                <!-- APR % -->
+                    <!-- Left Side: Inputs Column -->
+                    <div class="inputs-column">
+                        <!-- Main Parameters Card -->
+                        <section class="card-glass input-section">
+                            <h2 class="section-title">
+                                <i data-lucide="sliders" class="icon-title"></i>
+                                Parámetros del Préstamo
+                            </h2>
+                            
+                            <form id="apr-form" onsubmit="return false;">
+                                <!-- Principal Amount -->
                                 <div class="input-group">
-                                    <label for="apr-rate">Tasa Anual (APR %)</label>
-                                    <div class="input-wrapper input-blue">
-                                        <input type="number" id="apr-rate" placeholder="12.00" min="0" step="0.01" required autocomplete="off">
-                                        <span class="input-suffix">%</span>
+                                    <label id="apr-principal-label" for="apr-principal">Monto del Préstamo (Principal)</label>
+                                    <div class="input-wrapper input-purple">
+                                        <span class="input-prefix">$</span>
+                                        <input type="number" id="apr-principal" placeholder="1,000.00" min="0.01" step="0.01" required autocomplete="off">
+                                        <span class="input-suffix">USD</span>
                                     </div>
-                                    <p class="input-helper">Tasa de interés nominal anual.</p>
+                                    <p id="apr-principal-helper" class="input-helper">El monto total de la deuda solicitada.</p>
                                 </div>
 
-                                <!-- Time / Period -->
+                                <div class="rates-grid">
+                                    <!-- APR % -->
+                                    <div class="input-group">
+                                        <label for="apr-rate">Tasa Anual (APR %)</label>
+                                        <div class="input-wrapper input-blue">
+                                            <input type="number" id="apr-rate" placeholder="12.00" min="0" step="0.01" required autocomplete="off">
+                                            <span class="input-suffix">%</span>
+                                        </div>
+                                        <p class="input-helper">Tasa de interés nominal anual.</p>
+                                    </div>
+
+                                    <!-- Time / Period -->
+                                    <div class="input-group">
+                                        <label for="apr-time">Período de Tiempo</label>
+                                        <div class="input-wrapper input-emerald time-input-wrapper">
+                                            <input type="number" id="apr-time" placeholder="12" min="1" step="1" required autocomplete="off">
+                                            <select id="apr-time-unit" class="select-embedded">
+                                                <option value="months">Meses</option>
+                                                <option value="years" selected>Años</option>
+                                            </select>
+                                        </div>
+                                        <p class="input-helper">Duración del préstamo.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Amortization Frequency -->
                                 <div class="input-group">
-                                    <label for="apr-time">Período de Tiempo</label>
-                                    <div class="input-wrapper input-emerald time-input-wrapper">
-                                        <input type="number" id="apr-time" placeholder="12" min="1" step="1" required autocomplete="off">
-                                        <select id="apr-time-unit" class="select-embedded">
-                                            <option value="months">Meses</option>
-                                            <option value="years" selected>Años</option>
+                                    <label id="apr-compounding-label" for="apr-compounding">Método de Pago / Amortización</label>
+                                    <div class="select-wrapper">
+                                        <select id="apr-compounding" class="select-custom">
+                                            <option value="amortized" selected>Cuota Fija (Amortización Francesa)</option>
+                                            <option value="bullet">Pago Único (Capital + Interés al final)</option>
                                         </select>
+                                        <div class="select-arrow"><i data-lucide="chevron-down"></i></div>
                                     </div>
-                                    <p class="input-helper">Duración del préstamo.</p>
+                                    <p id="apr-compounding-helper" class="input-helper">Estructura en la que se devuelve el préstamo.</p>
                                 </div>
+                            </form>
+                        </section>
+
+                        <!-- Card 2: Advanced Early Repayment Mode -->
+                        <section id="card-early-pay" class="card-glass input-section early-pay-card" style="margin-top: 1.5rem;">
+                            <div class="toggle-card-header" style="margin-bottom: 0.5rem;">
+                                <h3 class="section-title" style="margin-bottom: 0; font-size: 1rem;">
+                                    <i data-lucide="zap" class="icon-title icon-emerald"></i>
+                                    Modo Avanzado: Pagos Anticipados & Ahorro
+                                </h3>
+                                <label class="switch">
+                                    <input type="checkbox" id="toggle-early-pay">
+                                    <span class="slider round"></span>
+                                </label>
                             </div>
 
-                            <!-- Amortization Frequency -->
-                            <div class="input-group">
-                                <label id="apr-compounding-label" for="apr-compounding">Método de Pago / Amortización</label>
-                                <div class="select-wrapper">
-                                    <select id="apr-compounding" class="select-custom">
-                                        <option value="amortized" selected>Cuota Fija (Amortización Francesa)</option>
-                                        <option value="bullet">Pago Único (Capital + Interés al final)</option>
-                                    </select>
-                                    <div class="select-arrow"><i data-lucide="chevron-down"></i></div>
+                            <div id="early-pay-body" class="early-pay-body hidden">
+                                <p class="input-helper" style="margin-bottom: 1rem;">
+                                    Simula el impacto de abonar a capital, elevar tu cuota o reducir el plazo para ahorrar en intereses.
+                                </p>
+
+                                <!-- Strategy Selector -->
+                                <div class="strategy-segmented">
+                                    <button type="button" class="strategy-btn active" data-strategy="higher_payment">
+                                        <i data-lucide="arrow-up-circle"></i>
+                                        <span>Cuota Mayor</span>
+                                    </button>
+                                    <button type="button" class="strategy-btn" data-strategy="target_time">
+                                        <i data-lucide="clock"></i>
+                                        <span>Reducir Plazo</span>
+                                    </button>
+                                    <button type="button" class="strategy-btn" data-strategy="lump_sum">
+                                        <i data-lucide="banknote"></i>
+                                        <span>Abono Único</span>
+                                    </button>
                                 </div>
-                                <p id="apr-compounding-helper" class="input-helper">Estructura en la que se devuelve el préstamo.</p>
+
+                                <!-- Strategy 1: Higher Payment / Extra Monthly -->
+                                <div class="strategy-pane active" data-strategy-pane="higher_payment">
+                                    <div class="input-group">
+                                        <label for="early-custom-payment">Nueva Cuota Mensual Deseada</label>
+                                        <div class="input-wrapper input-emerald">
+                                            <span class="input-prefix">$</span>
+                                            <input type="number" id="early-custom-payment" placeholder="400.00" min="0" step="0.01" autocomplete="off">
+                                            <span class="input-suffix">USD/mes</span>
+                                        </div>
+                                        <p id="early-custom-helper" class="input-helper">Cuota mensual con abono extra recurrente a capital.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Strategy 2: Target Payoff Duration -->
+                                <div class="strategy-pane" data-strategy-pane="target_time">
+                                    <div class="input-group">
+                                        <label for="early-target-time">Liquidar Deuda En</label>
+                                        <div class="input-wrapper input-blue time-input-wrapper">
+                                            <input type="number" id="early-target-time" placeholder="2" min="1" step="1" autocomplete="off">
+                                            <select id="early-target-unit" class="select-embedded">
+                                                <option value="months">Meses</option>
+                                                <option value="years" selected>Años</option>
+                                            </select>
+                                        </div>
+                                        <p id="early-target-helper" class="input-helper">Calcula la cuota acelerada requerida para terminar antes.</p>
+                                    </div>
+                                </div>
+
+                                <!-- Strategy 3: Lump Sum Extra Payment -->
+                                <div class="strategy-pane" data-strategy-pane="lump_sum">
+                                    <div class="rates-grid">
+                                        <div class="input-group">
+                                            <label for="early-lump-amount">Abono Extraordinario</label>
+                                            <div class="input-wrapper input-purple">
+                                                <span class="input-prefix">$</span>
+                                                <input type="number" id="early-lump-amount" placeholder="2000.00" min="1" step="1" autocomplete="off">
+                                                <span class="input-suffix">USD</span>
+                                            </div>
+                                            <p class="input-helper">Monto pagado directo a capital.</p>
+                                        </div>
+                                        <div class="input-group">
+                                            <label for="early-lump-month">En el Mes #</label>
+                                            <div class="input-wrapper input-blue">
+                                                <input type="number" id="early-lump-month" placeholder="12" min="1" step="1" autocomplete="off">
+                                            </div>
+                                            <p class="input-helper">Mes en el que harás el pago único.</p>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </form>
-                    </section>
+                        </section>
+                    </div>
 
                     <!-- Right Side: Results & Visualization -->
                     <section class="results-section">
@@ -294,6 +384,102 @@
                                     <span class="unit">$</span><span id="apr-monthly-detail">0.00</span>
                                 </div>
                                 <p id="detail-payment-desc" class="detail-description">Cuota mensual amortizada (Principal + Intereses).</p>
+                            </div>
+                        </div>
+
+                        <!-- Savings Hero Banner (Modo Avanzado) -->
+                        <div id="early-savings-banner" class="savings-hero-banner hidden">
+                            <div class="savings-hero-header">
+                                <div class="savings-hero-title">
+                                    <i data-lucide="award"></i>
+                                    <span>Ahorro Estimado en Intereses</span>
+                                </div>
+                                <span id="early-savings-pct" class="savings-pct-chip">-0.0%</span>
+                            </div>
+                            <div id="early-savings-amount" class="savings-hero-amount">
+                                <span class="currency">$</span>0.00
+                            </div>
+                            <div id="early-savings-footer" class="savings-hero-footer">
+                                <span>Liquidación en 0 meses</span>
+                            </div>
+                        </div>
+
+                        <!-- Comparison Matrix (Plan Original vs Anticipado) -->
+                        <div id="early-comparison-matrix" class="comparison-matrix-card hidden">
+                            <div class="matrix-grid">
+                                <div class="matrix-col">
+                                    <div class="matrix-col-title">
+                                        <i data-lucide="file-text"></i>
+                                        <span>Plan Original</span>
+                                    </div>
+                                    <div class="matrix-item">
+                                        <span>Plazo:</span>
+                                        <strong id="matrix-orig-months">0 meses</strong>
+                                    </div>
+                                    <div class="matrix-item">
+                                        <span>Cuota mensual:</span>
+                                        <strong id="matrix-orig-payment">$0.00</strong>
+                                    </div>
+                                    <div class="matrix-item">
+                                        <span>Intereses:</span>
+                                        <strong id="matrix-orig-interest">$0.00</strong>
+                                    </div>
+                                    <div class="matrix-item">
+                                        <span>Total a pagar:</span>
+                                        <strong id="matrix-orig-total">$0.00</strong>
+                                    </div>
+                                </div>
+
+                                <div class="matrix-col accelerated">
+                                    <div class="matrix-col-title">
+                                        <i data-lucide="zap"></i>
+                                        <span>Plan Acelerado</span>
+                                    </div>
+                                    <div class="matrix-item">
+                                        <span>Nuevo Plazo:</span>
+                                        <strong id="matrix-new-months">0 meses</strong>
+                                    </div>
+                                    <div class="matrix-item">
+                                        <span>Cuota/Abono:</span>
+                                        <strong id="matrix-new-payment">$0.00</strong>
+                                    </div>
+                                    <div class="matrix-item highlight">
+                                        <span>Intereses:</span>
+                                        <strong id="matrix-new-interest">$0.00</strong>
+                                    </div>
+                                    <div class="matrix-item highlight">
+                                        <span>Total a pagar:</span>
+                                        <strong id="matrix-new-total">$0.00</strong>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Button to View Schedule Table -->
+                            <button type="button" id="early-schedule-trigger" class="schedule-trigger-btn">
+                                <i data-lucide="calendar"></i>
+                                <span>Ver Cronograma de Pagos (Mes a Mes)</span>
+                            </button>
+
+                            <!-- Collapsible Schedule Table -->
+                            <div id="early-schedule-container" class="schedule-container">
+                                <div class="schedule-header">
+                                    <span>Tabla de Amortización Francesa</span>
+                                </div>
+                                <div class="schedule-table-wrap">
+                                    <table class="schedule-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Mes</th>
+                                                <th>Cuota</th>
+                                                <th>Interés</th>
+                                                <th>Capital</th>
+                                                <th>Saldo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="early-schedule-tbody">
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </section>
@@ -562,6 +748,8 @@
     </div>
 
     <!-- Script connection -->
+    <script src="js/amortization.js"></script>
+    <script src="js/early-payment-ui.js"></script>
     <script src="app.js"></script>
 </body>
 </html>

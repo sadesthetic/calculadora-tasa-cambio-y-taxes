@@ -9,8 +9,10 @@ La brecha entre la tasa de cambio oficial (Banco Central de Venezuela / Banco de
 - **Diseño Premium**: Interfaz moderna con efectos de glassmorphism, esquemas de colores HSL elegantes y tipografía de alta definición ("Plus Jakarta Sans" y "Space Grotesk").
 - **Modo Oscuro / Claro**: Cambia de tema con un solo clic con transiciones suaves.
 - **Cálculo en Tiempo Real**: Los resultados se actualizan inmediatamente a medida que escribes, sin necesidad de pulsar un botón de "calcular".
-- **Visualización Gráfica**: Una barra de progreso interactiva te muestra en color azul lo que estás gastando realmente y en verde el ahorro directo que conservas.
-- **Memoria de Datos**: Guarda automáticamente los últimos tipos de cambio que ingresaste mediante `localStorage`, de modo que no tienes que reescribirlos cada vez que abres la app.
+- **Calculadora de Préstamos y Amortización Francesa**: Permite calcular cuotas fijas de préstamos personales, hipotecarios o vehiculares.
+- **Modo Avanzado (Pagos Anticipados & Ahorro)**: Simula abonos extraordinarios a capital, incremento voluntario de cuota mensual o reducción de plazo objetivo (ej. liquidar en 2 años en lugar de 5), calculando el ahorro exacto en intereses, el tiempo recortado y generando el cronograma dinámico de pagos mes a mes.
+- **Visualización Gráfica**: Barras de progreso interactivas y matrices comparativas que contrastan el plan original frente al plan acelerado.
+- **Memoria de Datos**: Guarda automáticamente tus preferencias mediante `localStorage`.
 
 ## 📊 Fórmulas de Cálculo
 
